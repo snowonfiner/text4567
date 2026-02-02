@@ -415,6 +415,7 @@ namespace AnimeStudio
         public int m_NameIndex;
         public int m_Index;
         public int m_SamplerIndex;
+        public int m_SamplerSpace;
         public sbyte m_Dim;
 
         public TextureParameter(ObjectReader reader)
@@ -425,12 +426,16 @@ namespace AnimeStudio
             {
                 m_NameIndex = reader.ReadInt32();
                 m_Index = reader.ReadInt32();
-                if (Shader.HasPlatformInfos(reader.serializedType))
+                if (reader.Game.Type.IsSRGroup())
                 {
                     var m_RegisterSpace = reader.ReadInt32();
                     var m_BindCount = reader.ReadInt32();
                 }
                 m_SamplerIndex = reader.ReadInt32();
+                if (reader.Game.Type.IsSR())
+                {
+                    m_SamplerSpace = reader.ReadInt32();
+                }
                 if (version[0] > 2017 || (version[0] == 2017 && version[1] >= 3)) //2017.3 and up
                 {
                     var m_MultiSampled = reader.ReadBoolean();
@@ -453,7 +458,7 @@ namespace AnimeStudio
 
             m_NameIndex = reader.ReadInt32();
             m_Index = reader.ReadInt32();
-            if (Shader.HasPlatformInfos(reader.serializedType))
+            if (reader.Game.Type.IsSRGroup())
             {
                 var m_RegisterSpace = reader.ReadInt32();
                 var m_BindCount = reader.ReadInt32();
@@ -637,7 +642,7 @@ namespace AnimeStudio
                 m_Samplers.Add(new SamplerParameter(reader));
             }
 
-            if (reader.Game.Type.IsArknightsEndfieldCB3())
+            if (reader.Game.Type.IsArknightsEndfieldCB3() || reader.Game.Type.IsArknightsEndfield())
             {
                 int numDescriptorSetParams = reader.ReadInt32();
                 m_DescriptorSetParams = new List<DescriptorSetParam>();
@@ -989,10 +994,14 @@ namespace AnimeStudio
             {
                 var m_HasProceduralInstancingVariant = reader.ReadBoolean();
             }
-            if (reader.Game.Type.IsArknightsEndfieldCB3())
+            if (reader.Game.Type.IsArknightsEndfieldCB3() || reader.Game.Type.IsArknightsEndfield())
             {
                 var m_HasSRPInstancingVariant = reader.ReadBoolean();
                 var m_HasHGECSInstancingVariant = reader.ReadBoolean();
+            }
+            if (reader.Game.Type.IsSR())
+            {
+                var m_HasMultiDrawVariant = reader.ReadBoolean();
             }
             reader.AlignStream();
             m_UseName = reader.ReadAlignedString();
@@ -1096,7 +1105,7 @@ namespace AnimeStudio
             if (version[0] > 2021 || (version[0] == 2021 && version[1] >= 2)) //2021.2 and up
             {
                 m_KeywordNames = reader.ReadStringArray();
-                if (reader.Game.Type.IsArknightsEndfieldCB3())
+                if (reader.Game.Type.IsArknightsEndfieldCB3() || reader.Game.Type.IsArknightsEndfield())
                 {
                     m_DifferentMaterialCbKeywordNames = reader.ReadStringArray();
                 }
@@ -1224,7 +1233,7 @@ namespace AnimeStudio
         public ShaderPlatformInfos[] platformInfos;
 
         public override string Name => m_ParsedForm?.m_Name ?? m_Name;
-        public static bool HasPlatformInfos(SerializedType type) => type.Match("D114ED797139152A2E4A42339CF4AA8E"); // Star Rail
+        // public static bool HasPlatformInfos(SerializedType type) => type.Match("D114ED797139152A2E4A42339CF4AA8E"); // Star Rail
 
         public Shader(ObjectReader reader) : base(reader)
         {
@@ -1238,7 +1247,7 @@ namespace AnimeStudio
                     Logger.Error($"Cannot parse shader, no more bytes left for asset {reader.assetsFile.fileName} of {reader.assetsFile.originalPath} at path {reader.m_PathID}.");
                     return;
                 }
-                if (reader.Game.Type.IsArknightsEndfieldCB3())
+                if (reader.Game.Type.IsArknightsEndfieldCB3() || reader.Game.Type.IsArknightsEndfield())
                 {
                     m_UseExternalBlobs = reader.ReadBoolean();
                     reader.AlignStream();
@@ -1254,7 +1263,7 @@ namespace AnimeStudio
                     reader.AlignStream();
                 }
                 platforms = reader.ReadUInt32Array().Select(x => (ShaderCompilerPlatform)x).ToArray();
-                if (HasPlatformInfos(reader.serializedType))
+                if (reader.Game.Type.IsSRGroup())
                 {
                     int numPlatformInfos = reader.ReadInt32();
                     platformInfos = new ShaderPlatformInfos[numPlatformInfos];
@@ -1308,7 +1317,7 @@ namespace AnimeStudio
                     }
                 }
 
-                if (reader.Game.Type.IsArknightsEndfieldCB3())
+                if (reader.Game.Type.IsArknightsEndfieldCB3() || reader.Game.Type.IsArknightsEndfield())
                 {
                     var m_CompressionType = reader.ReadInt32();
                 }

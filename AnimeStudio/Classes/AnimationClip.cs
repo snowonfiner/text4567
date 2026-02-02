@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace AnimeStudio
 {
@@ -1342,7 +1340,7 @@ namespace AnimeStudio
             {
                 m_ConstantClip = new ConstantClip(reader);
             }
-            if (reader.Game.Type.IsArknightsEndfieldCB3())
+            if (reader.Game.Type.IsArknightsEndfieldCB3() || reader.Game.Type.IsArknightsEndfield())
             {
                 var m_CompressedCurveCount = reader.ReadUInt32();
             }
@@ -1735,6 +1733,7 @@ namespace AnimeStudio
         {
             Version = reader.ReadInt32();
 
+            // All of these are ACL compressed tracks with 0xac11ac11 magic
             TransformBufferData = reader.ReadUInt8Array();
             reader.AlignStream();
 
@@ -1861,7 +1860,7 @@ namespace AnimeStudio
                 intParameter = reader.ReadInt32();
             }
             messageOptions = reader.ReadInt32();
-            if (reader.Game.Type.IsArknightsEndfieldCB3())
+            if (reader.Game.Type.IsArknightsEndfieldCB3() || reader.Game.Type.IsArknightsEndfield())
             {
                 hashCodeType = reader.ReadInt32();
             }
@@ -1943,7 +1942,7 @@ namespace AnimeStudio
                 var m_aclScalarTrackId2CurveId = reader.ReadUInt32Array();
             }
             m_Compressed = reader.ReadBoolean();
-            if (reader.Game.Type.IsArknightsEndfieldCB3())
+            if (reader.Game.Type.IsArknightsEndfieldCB3() || reader.Game.Type.IsArknightsEndfield())
             {
                 var m_TransferCompressed = reader.ReadBoolean();
             }
@@ -2062,7 +2061,7 @@ namespace AnimeStudio
             {
                 m_ClipBindingConstant = new AnimationClipBindingConstant(reader);
             }
-            if (reader.Game.Type.IsArknightsEndfieldCB3())
+            if (reader.Game.Type.IsArknightsEndfieldCB3() || reader.Game.Type.IsArknightsEndfield())
             {
                 m_AclCompressedBuffer = new AnimClipAclCompressedBuffer(reader);
             }
@@ -2078,7 +2077,7 @@ namespace AnimeStudio
             {
                 m_Events.Add(new AnimationEvent(reader));
             }
-            if (reader.Game.Type.IsArknightsEndfieldCB3())
+            if (reader.Game.Type.IsArknightsEndfieldCB3() || reader.Game.Type.IsArknightsEndfield())
             {
                 var m_ClipTag = reader.ReadUInt16();
                 var m_TransitionRotateMode = reader.ReadByte();
